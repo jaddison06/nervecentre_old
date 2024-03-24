@@ -123,11 +123,14 @@ def param_list(func: CodegenFunction) -> str:
 def func_class_get_library(file: ParsedGenFile) -> str:
     out = ""
 
-    out += f"            final lib = DynamicLibrary.open('build{path.sep}"
     # in the Dart string, if we're on Windows, we want to put "build\\whatever", or the slash will get interpreted
     # by Dart as an escape character
-    if path.sep == "\\":
-        out += "\\"
+    dartSep = path.sep
+    if dartSep == '\\':
+        dartSep *= 2
+
+    out += f"            final lib = DynamicLibrary.open('build{dartSep}objects{dartSep}"
+
     out += file.libpath_no_ext().replace("\\", "\\\\")
     
     out += f"{shared_library_extension()}');\n\n"

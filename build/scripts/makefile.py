@@ -10,58 +10,64 @@ def generate_makefile_item(target: str, dependencies: list[str], commands: list[
     out += "\n\n"
     return out
 
-def codegen(files: list[ParsedGenFile]) -> str:
-    out = ""
+def fs_util(*args: str) -> str:
+    return f'python build{path.sep}scripts{path.sep}fs_util.py {" ".join(args)}'
 
-    libs: list[str] = []
-    for file in files:
-        if not file.has_code(): continue
+def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
+    out = ''
 
-        lib_path = f"build{path.sep}{file.libpath_no_ext()}"
-        lib_name = f"{lib_path}{shared_library_extension()}"
+    for module_name, files in modules.items():
+        libs: list[str] = []
+        for file in files:
+            if not file.has_code(): continue
 
-        link_libs: list[str] = []
+            lib_path = f"build{path.sep}objects{path.sep}{file.libpath_no_ext()}"
+            lib_name = f"{lib_path}{shared_library_extension()}"
 
-        for annotation in file.annotations:
-            if annotation.name == "LinkWithLib":
-                link_libs.append(annotation.args[0])
+            link_libs: list[str] = []
 
-        #? removed `-I.`
-        command = f"gcc -shared -o {lib_name} -fPIC {file.name_no_ext()}.c"
-        for lib in link_libs:
-            command += f" -l{lib}"
+            for annotation in file.annotations:
+                if annotation.name == "LinkWithLib":
+                    link_libs.append(annotation.args[0])
 
-        # todo: #included dependencies
+            #? removed `-I.`
+            command = f"gcc -shared -o {lib_name} -fPIC {file.name_no_ext()}.c"
+            for lib in link_libs:
+                command += f" -l{lib}"
+
+            # todo: #included dependencies
+            out += generate_makefile_item(
+                lib_name,
+                [
+                    f"{file.name_no_ext()}.c"
+                ],
+                [
+                    fs_util('mkdir', path.dirname(lib_name)),
+                    command
+                ]
+            )
+
+            libs.append(lib_name)
+
         out += generate_makefile_item(
-            lib_name,
-            [
-                f"{file.name_no_ext()}.c"
-            ],
-            [
-                f"mkdir -p {path.dirname(lib_name)}",
-                command
-            ]
+            module_name,
+            libs,
+            []
         )
-
-        libs.append(lib_name)
     
-    
-    # there's a directory called codegen, so we have to use .PHONY to
-    # tell make to use the rule called "codegen" instead of the directory
-    out = ".PHONY: codegen\n\n" \
-      + generate_makefile_item(
+    out = generate_makefile_item(
         "all",
         ["codegen", "libraries"], # codegen MUST be before libraries because the C files might need to include c_codegen.h
         []
     ) + generate_makefile_item(
         "libraries",
-        libs,
+        list(modules.keys()),
         []
     ) + generate_makefile_item(
         "codegen",
         [],
         [
-            f"python codegen{path.sep}main.py"
+            f"python build{path.sep}scripts{path.sep}main_2.py"
         ]
     ) + generate_makefile_item(
         "run",
@@ -76,10 +82,7 @@ def codegen(files: list[ParsedGenFile]) -> str:
         "clean",
         [],
         [
-            "rm -rf build",
-            f"rm -f {get_config(ConfigField.c_output_path)}",
-            f"rm -f {get_config(ConfigField.dart_output_path)}",
-            f"rm -f {get_config(ConfigField.cloc_exclude_list_path)}"
+            fs_util('rm_dir', 'build/objects')
         ]
     ) + (
         ''.join([generate_makefile_item(

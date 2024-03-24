@@ -1,0 +1,12 @@
+client/.dart_tool/
+server/.dart_tool/
+build/scripts/__pycache__/
+build/objects/
+Makefile
+.cloc_exclude_list.txt
+client/generated.dart
+client/native/c_codegen.h
+server/bin/generated.dart
+server/native/c_codegen.h
+shared/bin/generated.dart
+shared/native/c_codegen.h

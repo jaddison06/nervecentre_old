@@ -21,12 +21,12 @@ def all_with_extension(directory: str, ext: str) -> list[str]:
     return out
 
 # return list of parsed gen files so we can reuse them if needed
-def do_module_codegen(module: str) -> list[ParsedGenFile]:
+def do_module_codegen(module: str, is_dartsubproject: bool) -> list[ParsedGenFile]:
     parsed_files: list[ParsedGenFile] = []
     for gen_file in all_with_extension(f'{module}/native', '.gen'):
         parsed_files.append(Parser(gen_file).parse())
     
-    with open(f'{module}/generated.dart', 'wt') as fh:
+    with open(f'{module}/{"bin/" if is_dartsubproject else ""}generated.dart', 'wt') as fh:
         fh.write(dart.codegen(parsed_files))
     with open(f'{module}/native/c_codegen.h', 'wt') as fh:
         fh.write(c.codegen(parsed_files))
@@ -35,17 +35,22 @@ def do_module_codegen(module: str) -> list[ParsedGenFile]:
 
 # CONFIG
 # todo: move some (all?) to commandline
-MODULES = ['client', 'server', 'shared']
+# name of module -> is it a Dart subproject?
+MODULES = {'client': True, 'server': True, 'shared': False}
 USE_CLOC = True
 
 def main():
-    all_genfiles: list[ParsedGenFile] = []
+    all_genfiles: dict[str, list[ParsedGenFile]] = {}
 
-    for module in MODULES:
-        all_genfiles += do_module_codegen(module)
+    for module, is_dartsubproject in MODULES.items():
+        all_genfiles[module] = do_module_codegen(module, is_dartsubproject)
 
     with open('Makefile', 'wt') as fh:
         fh.write(makefile.codegen(all_genfiles))
     
     if USE_CLOC:
-        fh.write(cloc_exclude_list.codegen())
+        with open('.cloc_exclude_list.txt', 'wt') as fh:
+            fh.write(cloc_exclude_list.codegen())
+
+if __name__ == '__main__':
+    main()
