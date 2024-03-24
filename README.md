@@ -1,2 +1,3 @@
-# nervecentre
-Show control configuration utility
+# Nerve Centre
+
+Nerve Centre is a tool to help you manage your show network.
