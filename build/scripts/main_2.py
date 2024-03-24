@@ -42,8 +42,16 @@ USE_CLOC = True
 def main():
     all_genfiles: dict[str, list[ParsedGenFile]] = {}
 
+    for module in MODULES.keys():
+        all_genfiles[module] = []
+        for gen_file in all_with_extension(f'{module}/native', '.gen'):
+            all_genfiles[module].append(Parser(gen_file).parse())
+    
     for module, is_dartsubproject in MODULES.items():
-        all_genfiles[module] = do_module_codegen(module, is_dartsubproject)
+        with open(f'{module}/{"bin/" if is_dartsubproject else ""}generated.dart', 'wt') as fh:
+            fh.write(dart.codegen(all_genfiles[module] + all_genfiles['shared']))
+        with open(f'{module}/native/c_codegen.h', 'wt') as fh:
+            fh.write(c.codegen(all_genfiles[module] + all_genfiles['shared']))
 
     with open('Makefile', 'wt') as fh:
         fh.write(makefile.codegen(all_genfiles))

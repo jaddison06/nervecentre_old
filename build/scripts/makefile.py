@@ -75,8 +75,7 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
             "all"
         ],
         [
-            "dart run"
-            #"dart run --enable-vm-service"
+            "dart runner.dart"
         ]
     ) + generate_makefile_item(
         "clean",

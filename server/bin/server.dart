@@ -1,5 +1,8 @@
-import 'package:server/server.dart' as server;
+import 'generated.dart';
 
 void main(List<String> arguments) {
-  print('Hello world: ${server.calculate()}!');
+  libServerHello().ServerHello(5);
+  libNativeHello().NativeHello(123, 'can i put my balls in yo jaw');
+  print('Server initialized');
+  while (true) {}
 }
