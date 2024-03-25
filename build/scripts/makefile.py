@@ -11,7 +11,7 @@ def generate_makefile_item(target: str, dependencies: list[str], commands: list[
     return out
 
 def fs_util(*args: str) -> str:
-    return f'python build{path.sep}scripts{path.sep}fs_util.py {" ".join(args)}'
+    return f'{get_config(ConfigField.python_executable)} build{path.sep}scripts{path.sep}fs_util.py {" ".join(args)}'
 
 def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
     out = ''
@@ -67,7 +67,7 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
         "codegen",
         [],
         [
-            f"python build{path.sep}scripts{path.sep}main_2.py"
+            f"{get_config(ConfigField.python_executable)} build{path.sep}scripts{path.sep}main_2.py"
         ]
     ) + generate_makefile_item(
         "run",
@@ -81,23 +81,22 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
         "clean",
         [],
         [
-            fs_util('rm_dir', 'build/objects')
+            fs_util('rm_dir', 'build/objects'),
+            fs_util('rm_file', '.cloc_exclude_list.txt'),
+            *map(lambda module: fs_util('rm_file', f'{module}/native/c_codegen.h', f'{module}/generated.dart'), modules.keys())
         ]
     ) + (
         ''.join([generate_makefile_item(
-            # The `cloc` command-line utility MUST be installed, or this won't work.
-            # https://github.com/AlDanial/cloc
             "cloc",
-            [],
+            ['codegen'],
             [
-                # exclude generated files so cloc actually shows real results
-                f"cloc . --exclude-list={get_config(ConfigField.cloc_exclude_list_path)}"
+                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.cloc_exclude_list.txt"
             ]
         ) + generate_makefile_item(
             "cloc-by-file",
-            [],
+            ['codegen'],
             [
-                f"cloc . --exclude-list={get_config(ConfigField.cloc_exclude_list_path)} --by-file"
+                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.cloc_exclude_list.txt --by-file"
             ]
         )]) if get_config(ConfigField.use_cloc) else ""
     ) + out

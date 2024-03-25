@@ -1,1 +1,0 @@
-int NativeHello(int arg1, char* arg2)

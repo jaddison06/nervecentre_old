@@ -1,18 +1,27 @@
 import 'dart:io';
 import 'dart:convert';
 
+extension on Stream<List<int>> {
+  void passthrough([String prefix = '']) {
+    transform(utf8.decoder)
+      .transform(LineSplitter())
+      .forEach((line) => print('$prefix$line'));
+  }
+}
+
 void main() async {
   late final Process client;
-  final server = await Process.start('dart', ['run', 'server/bin/main.dart']);
+  final server = await Process.start('dart', ['server/bin/server.dart']);
   server.stdout
     .transform(utf8.decoder)
-    .forEach((line) async { if (line == 'Server intitialized\n') {
-      print('Server initialized');
-      client = await Process.start('dart', ['run', 'client/bin/main.dart']);
-    }});
-
-
-  // I have no idea what I'm doing
-  await client.exitCode;
-  await server.exitCode;
+    .transform(LineSplitter())
+    .forEach((line) async {
+      print('Server: $line');
+      if (line == 'Initialized') {
+        client = await Process.start('dart', ['client/bin/client.dart']);
+        client.stdout.passthrough('Client: ');
+        client.stderr.passthrough('Client: ');
+      }
+    });
+  server.stderr.passthrough('Server: ');
 }

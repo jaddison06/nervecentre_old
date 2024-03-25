@@ -1,30 +1,25 @@
 import sys
-from termcolor import colored
 import yaml
 import os.path as path
 from enum import Enum, auto
+from typing import NoReturn
 
-class ConfigField(Enum):
-    definition_ext = auto()
-    definition_search_path = auto()
-    dart_output_path = auto()
-    c_output_path = auto()
-    use_cloc = auto()
-    cloc_exclude_list_path = auto()
-
-DEFAULTS = {
-    ConfigField.definition_ext: ".gen",
-    ConfigField.definition_search_path: "native",
-    ConfigField.dart_output_path: "bin/dart_codegen.dart",
-    ConfigField.c_output_path: "native/c_codegen.h",
-    ConfigField.use_cloc: True,
-    ConfigField.cloc_exclude_list_path: ".cloc_exclude_list.txt",
-}
-
+# Create this file and start putting values in there if you wanna change shit
 CONFIG_FNAME = 'codegen.yaml'
 
-def panic(msg: str):
-    print(colored(f'CONFIG ERROR: {msg}'), 'red')
+class ConfigField(Enum):
+    use_cloc = auto()
+    cloc_executable = auto()
+    python_executable = auto()
+
+DEFAULTS = {
+    ConfigField.use_cloc: False,
+    ConfigField.cloc_executable: 'cloc',
+    ConfigField.python_executable: 'python'
+}
+
+def panic(msg: str) -> NoReturn:
+    print(f'CONFIG ERROR: {msg}')
     sys.exit()
 
 def get_config(key: ConfigField) -> str:

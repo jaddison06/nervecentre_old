@@ -1,3 +1,4 @@
+.vscode/
 client/.dart_tool/
 server/.dart_tool/
 build/scripts/__pycache__/
