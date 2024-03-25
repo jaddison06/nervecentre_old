@@ -1,5 +1,0 @@
-enum TestEnum {
-    Balls
-    MoreBalls
-    IHateThisProcess
-}

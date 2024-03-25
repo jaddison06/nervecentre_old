@@ -22,13 +22,13 @@ def panic(msg: str) -> NoReturn:
     print(f'CONFIG ERROR: {msg}')
     sys.exit()
 
-def get_config(key: ConfigField) -> str:
+def get_config(key: ConfigField):
     if path.exists(CONFIG_FNAME):
         with open(CONFIG_FNAME, 'rt') as fh:
             values = yaml.safe_load(fh)
-        if key.name in values:
+        if values is not None and key.name in values:
             return values[key.name]
     
-    if key in DEFAULTS: return str(DEFAULTS[key])
+    if key in DEFAULTS: return DEFAULTS[key]
 
     panic(f'Key {key} not found in values file or DEFAULTS')

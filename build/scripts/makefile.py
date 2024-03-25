@@ -67,7 +67,7 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
         "codegen",
         [],
         [
-            f"{get_config(ConfigField.python_executable)} build{path.sep}scripts{path.sep}main_2.py"
+            f"{get_config(ConfigField.python_executable)} build{path.sep}scripts{path.sep}main.py"
         ]
     ) + generate_makefile_item(
         "run",
@@ -82,7 +82,6 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
         [],
         [
             fs_util('rm_dir', 'build/objects'),
-            fs_util('rm_file', '.cloc_exclude_list.txt'),
             *map(lambda module: fs_util('rm_file', f'{module}/native/c_codegen.h', f'{module}/generated.dart'), modules.keys())
         ]
     ) + (
@@ -90,13 +89,13 @@ def codegen(modules: dict[str, list[ParsedGenFile]]) -> str:
             "cloc",
             ['codegen'],
             [
-                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.cloc_exclude_list.txt"
+                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.gitignore --exclude-dir=build"
             ]
         ) + generate_makefile_item(
             "cloc-by-file",
             ['codegen'],
             [
-                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.cloc_exclude_list.txt --by-file"
+                f"{get_config(ConfigField.cloc_executable)} . --exclude-list=.gitignore --exclude-dir=build --by-file"
             ]
         )]) if get_config(ConfigField.use_cloc) else ""
     ) + out
