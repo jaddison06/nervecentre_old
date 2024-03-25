@@ -1,0 +1,28 @@
+@LinkWithLib(SDL2)
+@LinkWithLib(SDL2_ttf)
+
+@Prefix(SD)
+class SDLDisplayRaw {
+    @Initializer()
+    void* SDInit(char* title, bool fullscreen)
+
+    @Getter(error)
+    char* SDGetError()
+
+    @Invalidates()
+    void SDDestroy()
+
+    void SDGetSize(int* width, int* height)
+
+    void SDClear(int r, int g, int b, int a)
+    void SDSetClip(int x, int y, int w, int h)
+
+    void SDResetClip()
+
+    void SDFlush()
+
+    void SDDrawRect(int x, int y, int w, int h, int r, int g, int b, int a)
+    void SDFillRect(int x, int y, int w, int h, int r, int g, int b, int a)
+
+    void SDDrawText(SDLFontRaw *font, char* text, int x, int y, int r, int g, int b, int a)
+}

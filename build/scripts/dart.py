@@ -204,6 +204,7 @@ def func_class_return_string(func: CodegenFunction, get_value: str) -> str:
     out = ""
 
     if func.return_type.typename == "bool":
+        # todo: > 0?
         out += f"({get_value}) == 1"
     elif lookup.is_enum(func.return_type.typename):
         out += f"{func.return_type.typename}FromInt({get_value})"

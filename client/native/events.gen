@@ -1,0 +1,47 @@
+enum EventType {
+    None
+    Quit
+    Key
+    Text
+    MouseMove
+    MouseDown
+    MouseUp
+    // can't be arsed tbh
+    //MouseScroll
+}
+
+enum MouseButton {
+    Left
+    Right
+    Middle
+}
+
+// MODIFIERS???????
+
+// Keys we generally think we should forward - 
+// safe subset across all implementations - can be changed if necessary
+enum Key {
+    Return
+    Escape
+    Backspace
+    Delete
+    Tab
+
+    Insert
+    Home
+    End
+    PageUp
+    PageDown
+
+    ArrowRight
+    ArrowLeft
+    ArrowDown
+    ArrowUp
+
+    LControl
+    RControl
+    LShift
+    RShift
+    LAlt
+    RAlt
+}
